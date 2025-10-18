@@ -1,0 +1,82 @@
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+ .navbar {
+    background: linear-gradient(to right, #2c3e50, #34495e);
+    padding: 15px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .navbar-container {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+
+  .nav-link {
+    color: white;
+    font-size: 16px;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: background 0.3s, transform 0.2s;
+  }
+
+  .nav-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
+  }
+
+  /* Optional: highlight current page */
+  .nav-link.active {
+    background: #1abc9c;
+    font-weight: bold;
+    color: white;
+  }
+
+  @media (max-width: 600px) {
+    .navbar-container {
+      flex-direction: column;
+      gap: 10px;
+    }
+  }
+#result { 
+  margin-top: 20px; 
+  font-size: 1.2em; 
+  color: green; 
+
+}
+
+#scan-result {
+  margin-top: 20px;
+  font-size: 1.2em;
+  color: green;
+}
+
+
+input, button { 
+  padding: 10px; 
+  font-size: 16px; 
+}
+
+#qrcode { 
+  margin-top: 20px; 
+}
+
+table { width: 100%; 
+  border-collapse: collapse; 
+  margin-top: 20px;
+
+}
+
+th, td { border: 1px solid #ccc; 
+  padding: 10px; 
+
+}
+
+th { background: #f4f4f4; 
+}

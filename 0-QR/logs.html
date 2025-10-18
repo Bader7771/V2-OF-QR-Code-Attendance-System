@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scan Logs Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .stat-card p {
+            font-size: 24px;
+            margin: 0;
+            color: #007bff;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #log-table {
+            width: 80%;
+            border-collapse: collapse;
+            margin: 20px auto;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #log-table th, #log-table td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        #log-table th {
+            background-color: #007bff;
+            color: white;
+            font-weight: 600;
+        }
+        #log-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        .search-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .search-container input {
+            padding: 10px 15px;
+            width: 300px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .search-container input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0,123,255,0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .qr-code {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto;
+        }
+        .qr-code img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal.show {
+            opacity: 1;
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 1200px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease-in-out;
+        }
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+        .close-modal {
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.2s ease;
+        }
+        .close-modal:hover {
+            color: #333;
+        }
+        .see-all-year {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .see-all-year:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .stat-item h4 {
+            margin: 0 0 10px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .stat-item p {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .employee-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .scan-history {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .scan-history table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .scan-history th, .scan-history td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .employee-name {
+            cursor: pointer;
+            color: #007bff;
+            text-decoration: underline;
+        }
+        .employee-name:hover {
+            color: #0056b3;
+        }
+        .download-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            float: right;
+            margin-right: 10px;
+        }
+        .download-btn:hover {
+            background-color: #218838;
+        }
+
+    </style>
+</head>
+<body>
+  <div id="navbar-container"></div>
+    <div class="container">
+        <h1>Employee Scan Dashboard</h1>
+        
+        <div class="stats-container">
+            <div class="stat-card">
+                <h3>Total Employees</h3>
+                <p id="total-employees">Loading...</p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Scans Today</h3>
+                <p id="today-scans">Loading...</p>
+            </div>
+            <div class="stat-card">
+                <h3>Most Active Employee</h3>
+                <p id="most-active">Loading...</p>
+            </div>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search by employee name...">
+        </div>
+
+        <table id="log-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Day</th>
+                    <th>Morning Departure</th>
+                    <th>Before Break</th>
+                    <th>On Break</th>
+                    <th>Break Out</th>
+                    <th>After Break</th>
+                    <th>Total Scans (Day)</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+ 
+    <div id="employeeModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 id="modalEmployeeName"></h2>
+                <button class="download-btn" id="modalDownloadBtn" style="display: none;">
+                    Download XLSX
+                </button>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h4>Total Attendance Days</h4>
+                    <p id="modalTotalDays">0</p>
+                </div>
+                <div class="stat-item">
+                    <h4>Average Scans per Day</h4>
+                    <p id="modalAvgScans">0</p>
+                </div>
+                <div class="stat-item">
+                    <h4>Most Active Month</h4>
+                    <p id="modalActiveMonth">-</p>
+                </div>
+                <div class="stat-item">
+                    <h4>Attendance Rate</h4>
+                    <p id="modalAttendanceRate">0%</p>
+                </div>
+            </div>
+
+            <div id="modalTableContainer">
+                <table id="modalLogTable" class="log-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Day</th>
+                            <th>Morning Departure</th>
+                            <th>Before Break</th>
+                            <th>On Break</th>
+                            <th>Break Out</th>
+                            <th>After Break</th>
+                            <th>Total Scans (Day)</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script>
+
+        fetch("navbar.html")
+            .then(res => res.text())
+            .then(html => document.getElementById("navbar-container").innerHTML = html);
+
+
+        function formatDateTimeForModal(dateString) {
+            const options = {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        }
+
+        function formatDateForDisplay(dateString) {
+            const date = new Date(dateString);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0'); 
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+
+        function generateQRCodeUrl(employeeId) {
+            return `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(employeeId)}`;
+        }
+
+       
+        function loadDashboardData() {
+            fetch('get_scans.php')
+                .then(response => response.json())
+                .then(data => {
+              
+                    document.getElementById('total-employees').textContent = data.total_employees;
+                    document.getElementById('today-scans').textContent = data.today_scans;
+                    document.getElementById('most-active').textContent = data.most_active_employee;
+
+                    const tbody = document.querySelector('#log-table tbody');
+                    tbody.innerHTML = '';
+                    
+                    data.employees_daily_data.forEach(employee => {
+                        
+                        const employeeNameRow = `
+                            <tr class="employee-header">
+                                <td colspan="8" style="background-color: #e2e6ea; font-weight: bold; text-align: left; padding: 10px;">
+                                    Agent: ${employee.name}
+                                </td>
+                            </tr>
+                        `;
+                        tbody.innerHTML += employeeNameRow;
+
+                        
+                        const lastWeekData = employee.daily_attendance.slice(-7);
+
+                       
+                        if (lastWeekData.length > 0) {
+                            lastWeekData.forEach(day_data => {
+                                const row = `
+                                    <tr>
+                                        <td>${formatDateForDisplay(day_data.date)}</td>
+                                        <td>${day_data.day_of_week}</td>
+                                        <td>${day_data.heure_depart_morning}</td>
+                                        <td>${day_data.heure_avant_pause}</td>
+                                        <td></td>
+                                        <td>${day_data.pause_out || ''}</td>
+                                        <td>${day_data.heure_apres_pause}</td>
+                                        <td>${day_data.total_scans_day}</td>
+                                    </tr>
+                                `;
+                                tbody.innerHTML += row;
+                            });
+
+                           
+                            const seeAllRow = `
+                                <tr>
+                                    <td colspan="8" style="text-align: center; padding: 15px;">
+                                        <a href="#" class="see-all-year" onclick="showYearlyData('${employee.employee_id}', '${employee.name}'); return false;">
+                                            See all the year
+                                        </a>
+                                    </td>
+                                </tr>
+                            `;
+                            tbody.innerHTML += seeAllRow;
+                        } else {
+                            const noDataRow = `
+                                <tr>
+                                    <td colspan="8" style="text-align: center; color: #666;">No attendance data for this employee for this month.</td>
+                                </tr>
+                            `;
+                            tbody.innerHTML += noDataRow;
+                        }
+                    });
+
+                 
+                    document.querySelectorAll('.employee-name').forEach(nameElement => {
+                        nameElement.addEventListener('click', function() {
+                            const employeeId = this.getAttribute('data-employee-id');
+                            const employeeName = this.textContent;
+                            showEmployeeModal(employeeId, employeeName);
+                        });
+                    });
+                })
+                .catch(error => console.error('Error loading dashboard data:', error));
+        }
+
+      
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#log-table tbody tr');
+            let currentAgentRow = null;
+            let showCurrentAgent = false;
+            
+            rows.forEach(row => {
+                if (row.classList.contains('employee-header')) {
+                  
+                    const agentName = row.textContent.toLowerCase();
+                    showCurrentAgent = agentName.includes(searchTerm);
+                    currentAgentRow = row;
+                    row.style.display = showCurrentAgent ? '' : 'none';
+                } else {
+                    
+                    if (currentAgentRow) {
+                        
+                        row.style.display = showCurrentAgent ? '' : 'none';
+                    }
+                }
+            });
+
+           
+            if (!searchTerm) {
+                rows.forEach(row => row.style.display = '');
+            }
+        });
+
+    
+        loadDashboardData();
+        
+ 
+        setInterval(loadDashboardData, 30000);
+
+   
+        const modal = document.getElementById('employeeModal');
+        const closeModal = document.querySelector('.close-modal');
+
+        closeModal.onclick = function() {
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = "none", 300);
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.classList.remove('show');
+                setTimeout(() => modal.style.display = "none", 300);
+            }
+        }
+
+        function showEmployeeModal(employeeId, employeeName) {
+            document.getElementById('modalEmployeeName').textContent = employeeName;
+            modal.style.display = "block";
+
+         
+            fetch(`get_employee_stats.php?employee_id=${employeeId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('modalTotalDays').textContent = data.total_days;
+                    document.getElementById('modalAvgScans').textContent = data.avg_scans_per_day;
+                    document.getElementById('modalActiveMonth').textContent = data.most_active_month;
+                    document.getElementById('modalAttendanceRate').textContent = data.attendance_rate + '%';
+
+                
+                    const tbody = document.querySelector('#modalLogTable tbody');
+                    tbody.innerHTML = '';
+                    
+                    data.yearly_attendance.forEach(day_data => {
+                        const row = `
+                            <tr>
+                                <td>${formatDateForDisplay(day_data.date)}</td>
+                                <td>${day_data.day_of_week}</td>
+                                <td>${day_data.heure_depart_morning}</td>
+                                <td>${day_data.heure_avant_pause}</td>
+                                <td></td>
+                                <td>${day_data.pause_out || ''}</td>
+                                <td>${day_data.heure_apres_pause}</td>
+                                <td>${day_data.total_scans_day}</td>
+                            </tr>
+                        `;
+                        tbody.innerHTML += row;
+                    });
+                })
+                .catch(error => console.error('Error loading employee stats:', error));
+        }
+
+        function showYearlyData(employeeId, employeeName) {
+            const modal = document.getElementById('employeeModal');
+            document.getElementById('modalEmployeeName').textContent = employeeName;
+            
+           
+            modal.style.display = "block";
+            setTimeout(() => modal.classList.add('show'), 10);
+
+           
+            const downloadBtn = document.getElementById('modalDownloadBtn');
+            downloadBtn.style.display = 'block';
+            downloadBtn.onclick = () => downloadYearlyData(employeeId, employeeName);
+
+           
+            fetch(`get_employee_stats.php?employee_id=${employeeId}&yearly=true`)
+                .then(response => response.json())
+                .then(data => {
+                  
+                    document.getElementById('modalTotalDays').textContent = data.total_days;
+                    document.getElementById('modalAvgScans').textContent = data.avg_scans_per_day;
+                    document.getElementById('modalActiveMonth').textContent = data.most_active_month;
+                    document.getElementById('modalAttendanceRate').textContent = data.attendance_rate + '%';
+
+                   
+                    const tbody = document.querySelector('#modalLogTable tbody');
+                    tbody.innerHTML = '';
+                    
+                    data.yearly_attendance.forEach(day_data => {
+                        const row = `
+                            <tr>
+                                <td>${formatDateForDisplay(day_data.date)}</td>
+                                <td>${day_data.day_of_week}</td>
+                                <td>${day_data.heure_depart_morning}</td>
+                                <td>${day_data.heure_avant_pause}</td>
+                                <td></td>
+                                <td>${day_data.pause_out || ''}</td>
+                                <td>${day_data.heure_apres_pause}</td>
+                                <td>${day_data.total_scans_day}</td>
+                            </tr>
+                        `;
+                        tbody.innerHTML += row;
+                    });
+                })
+                .catch(error => console.error('Error loading yearly data:', error));
+        }
+
+        function downloadYearlyData(employeeId, employeeName) {
+          
+            const employeeRows = [];
+            const rows = document.querySelectorAll('#modalLogTable tbody tr');
+            
+            rows.forEach(row => {
+                const cells = row.cells;
+                if (cells.length > 0) {
+                    employeeRows.push({
+                        date: cells[0].textContent,
+                        day: cells[1].textContent,
+                        morningDeparture: cells[2].textContent,
+                        beforeBreak: cells[3].textContent,
+                        onBreak: cells[4].textContent,
+                        breakOut: cells[5].textContent,
+                        afterBreak: cells[6].textContent,
+                        totalScans: cells[7].textContent
+                    });
+                }
+            });
+
+           
+            const ws = XLSX.utils.json_to_sheet(employeeRows);
+
+         
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Yearly Attendance");
+
+           
+            const fileName = `${employeeName.replace(/\s+/g, '_')}_yearly_attendance_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+          
+            XLSX.writeFile(wb, fileName);
+        }
+    </script>
+</body>
+</html> 

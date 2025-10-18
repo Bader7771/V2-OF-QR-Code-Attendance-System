@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Employee QR Attendance</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
+    <div id="navbar-container"></div>
+
+<script>
+  fetch("navbar.html")
+    .then(res => res.text())
+    .then(html => document.getElementById("navbar-container").innerHTML = html);
+</script>
+
+  <h1>Scan Employee QR Code</h1>
+  <div id="qr-reader" style="width: 300px; margin: auto;"></div>
+  <div id="result"></div>
+<div id="qr-reader" style="width: 300px; margin: auto;"></div>
+<p id="result" style="text-align: center; font-weight: bold; margin-top: 20px;"></p>
+<p id="countdown" style="text-align: center; color: #e67e22; font-size: 18px;"></p>
+
+  <script src="script.js"></script>
+</body>
+</html>

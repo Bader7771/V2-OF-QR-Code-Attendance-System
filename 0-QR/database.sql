@@ -1,0 +1,16 @@
+CREATE DATABASE IF NOT EXISTS attendance_db;
+USE attendance_db;
+
+CREATE TABLE IF NOT EXISTS employees (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS scans (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id VARCHAR(255) NOT NULL,
+    scan_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (employee_id) REFERENCES employees(employee_id)
+); 

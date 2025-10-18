@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Generate Employee QR Code</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+</head>
+<body>
+    <div id="navbar-container"></div>
+<script>
+  fetch("navbar.html")
+    .then(res => res.text())
+    .then(html => document.getElementById("navbar-container").innerHTML = html);
+</script>
+
+
+  <h1>QR Code Generator</h1>
+  <input type="text" id="employeeId" placeholder="Enter employee ID or name" />
+  <button onclick="generateQR()">Generate</button>
+  <div id="qrcode"></div>
+  <br>
+  <button onclick="downloadQR()">Download QR</button>
+
+  <script>
+    let lastDataUrl = "";
+
+    function generateQR() {
+      const text = document.getElementById("employeeId").value;
+      if (!text) return alert("Please enter employee ID");
+
+      QRCode.toDataURL(text, { width: 200 }, function (err, url) {
+        if (err) return console.error(err);
+        lastDataUrl = url;
+        document.getElementById("qrcode").innerHTML = `<img src="${url}" alt="QR Code" id="qr-img">`;
+      });
+    }
+
+    function downloadQR() {
+      if (!lastDataUrl) return alert("Please generate a QR code first");
+      const a = document.createElement("a");
+      a.href = lastDataUrl;
+      a.download = "employee-qr.png";
+      a.click();
+    }
+  </script>
+</body>
+</html>
